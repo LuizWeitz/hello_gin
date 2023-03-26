@@ -37,7 +37,7 @@ func UserCreate(c *gin.Context) {
 	}
 }
 
-func UserAll(c *gin.Context) {
+func UserListAll(c *gin.Context) {
 	// Criando uma var onde será armazenado todos os users
 	var users []models.User
 
@@ -67,4 +67,38 @@ func UserShow(c *gin.Context) {
 
 func UserUpdate(c *gin.Context) {
 
+	// Recuperando o id do user da url
+	id := c.Param("id")
+
+	// Recuperando as informaçãoes do corpo da requesição
+	var body struct {
+		Username string
+		Email    string
+		Age      int
+		City     string
+	}
+
+	c.Bind(&body)
+
+	// Pesquisando no banco de dados as informações do user
+	var user models.User
+	initializers.DB.First(&user, id)
+
+	// Realizando alteração dos dados
+	initializers.DB.Model(&user).Updates(models.User{Username: body.Username, Email: body.Email, Age: body.Age, City: body.City})
+
+	c.JSON(200, gin.H{
+		"user": user,
+	})
+}
+
+func UserDelete(c *gin.Context) {
+
+	// Recuperando o id do user da url
+	id := c.Param("id")
+
+	// Deletando user do banco de dados
+	initializers.DB.Delete(&models.User{}, id)
+
+	c.Status(200)
 }
